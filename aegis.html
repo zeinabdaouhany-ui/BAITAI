@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS · AI Project Governance & Architecture Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.5/babel.min.js"></script>
+
+<style>
+:root {
+  --cream: #F4F1EA;
+  --paper: #FBFAF6;
+  --ink: #1A1A1F;
+  --rule: #D8D2C5;
+  --navy: #1E2A4A;
+  --navy-t: #2C3D66;
+  --gold: #A8801C;
+  --gold-t: #C9A14A;
+  --ox: #8B2635;
+  --amber: #B8860B;
+  --green: #2D5A3D;
+  --mute: #6B6B72;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; background: var(--cream); color: var(--ink); }
+body { font-family: 'DM Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.5; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: inherit; outline: none; }
+
+.font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+.font-body    { font-family: 'DM Sans', system-ui, sans-serif; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+/* Layout */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.header { border-bottom: 1px solid var(--rule); position: sticky; top: 0; z-index: 20; background: var(--cream); }
+.header-row { padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.header-meta { display: flex; align-items: center; gap: 24px; }
+.divider-v { height: 32px; width: 1px; background: var(--rule); }
+.text-right { text-align: right; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-text-1 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+.brand-text-2 { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--mute); margin-top: 2px; }
+
+/* Phase nav */
+.phase-nav { padding: 0 32px 12px; display: flex; gap: 4px; overflow-x: auto; }
+.phase-btn { display: flex; align-items: center; gap: 12px; padding: 8px 16px; white-space: nowrap; transition: all 0.2s; border: 1px solid var(--rule); background: transparent; color: var(--ink); }
+.phase-btn.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.phase-btn-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--mute); }
+.phase-btn.active .phase-btn-num { color: var(--gold-t); }
+.phase-btn-label { font-size: 12px; font-weight: 500; letter-spacing: -0.01em; }
+
+main.content { padding: 40px 32px; max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
+
+footer.foot { border-top: 1px solid var(--rule); margin-top: 32px; padding: 24px 32px; }
+.foot-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px; }
+.mono-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--mute); }
+
+/* Section header */
+.section-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.22em; color: var(--gold); margin-bottom: 8px; }
+.section-title { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 500; line-height: 1.15; letter-spacing: -0.02em; color: var(--ink); }
+.section-sub { font-size: 14px; margin-top: 8px; max-width: 640px; color: var(--mute); }
+.section-header { margin-bottom: 32px; }
+
+/* Fields */
+.field-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--mute); margin-bottom: 6px; display: block; }
+.field-hint { font-size: 11px; margin-top: 4px; color: var(--mute); }
+.input-line { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--rule); font-size: 14px; padding: 8px 0; color: var(--ink); transition: border-color 0.2s; }
+.input-line:focus { border-color: var(--ink); }
+.input-area { width: 100%; background: transparent; border: 1px solid var(--rule); font-size: 14px; padding: 12px; color: var(--ink); resize: vertical; transition: border-color 0.2s; }
+.input-area:focus { border-color: var(--ink); }
+select.input-line { cursor: pointer; }
+
+/* Buttons */
+.btn { font-weight: 500; letter-spacing: -0.01em; transition: all 0.2s; cursor: pointer; }
+.btn-primary { background: var(--ink); color: var(--cream); }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+.btn-gold { background: var(--gold); color: var(--cream); }
+.btn-sm { font-size: 11px; padding: 6px 12px; }
+.btn-md { font-size: 13px; padding: 10px 20px; }
+
+/* Grids */
+.grid { display: grid; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.gap-8 { gap: 32px; }
+.gap-x-8 { column-gap: 32px; }
+.gap-x-10 { column-gap: 40px; }
+.gap-y-6 { row-gap: 24px; }
+
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-12 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+.col-span-1 { grid-column: span 1; }
+.col-span-2 { grid-column: span 2; }
+.col-span-3 { grid-column: span 3; }
+.col-span-4 { grid-column: span 4; }
+.col-span-5 { grid-column: span 5; }
+.col-span-7 { grid-column: span 7; }
+.col-span-11 { grid-column: span 11; }
+.col-span-12 { grid-column: 1 / -1; }
+.md-col-span-2 { grid-column: span 2; }
+
+/* Flex */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.items-baseline { align-items: baseline; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+
+/* Typography helpers */
+.uppercase-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; }
+.uppercase-mini { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; }
+.text-mute { color: var(--mute); }
+.text-ink { color: var(--ink); }
+
+/* Cards / boxes */
+.card { border: 1px solid var(--rule); padding: 24px; background: var(--paper); }
+.card-tight { border: 1px solid var(--rule); padding: 16px; background: var(--paper); }
+
+/* Checkbox */
+.cb-row { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; padding: 8px 0; }
+.cb-box { margin-top: 2px; flex-shrink: 0; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; border: 1.5px solid var(--rule); background: transparent; }
+.cb-box.checked { border-color: var(--ink); background: var(--ink); }
+.cb-label { font-size: 13px; line-height: 1.4; color: var(--ink); }
+.cb-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--mute); margin-top: 2px; }
+
+/* Layer accent bar */
+.layer-bar { width: 4px; height: 24px; }
+
+/* Compliance row */
+.cr-row { padding: 16px 20px; cursor: pointer; transition: background 0.15s; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; align-items: center; border-bottom: 1px solid var(--rule); }
+.cr-row:hover { background: rgba(0,0,0,0.02); }
+.cr-row:last-child { border-bottom: none; }
+.cr-header { padding: 12px 20px; border-bottom: 1px solid var(--rule); background: var(--paper); }
+.cr-detail { padding: 4px 20px 24px; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.tiny-select { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 8px; background: transparent; border: 1px solid var(--rule); color: var(--ink); }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 40; padding: 8px 20px; background: var(--ink); color: var(--cream); font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; }
+
+/* Drawer */
+.drawer-bg { position: fixed; inset: 0; z-index: 30; background: rgba(20,20,25,0.4); }
+.drawer { position: absolute; right: 0; top: 0; height: 100%; width: 100%; max-width: 440px; padding: 32px; background: var(--cream); border-left: 1px solid var(--rule); overflow-y: auto; }
+
+/* Stack */
+.stack > * + * { margin-top: var(--stack, 8px); }
+
+/* Phase nav (bottom prev/next) */
+.nav-end { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; }
+.nav-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--ink); cursor: pointer; }
+.nav-link:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Custom thin scrollbars for the phase nav */
+.phase-nav::-webkit-scrollbar { height: 2px; }
+.phase-nav::-webkit-scrollbar-thumb { background: var(--rule); }
+
+/* Form chips */
+.chip { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; padding: 6px 12px; transition: all 0.15s; cursor: pointer; border: 1px solid var(--rule); background: transparent; color: var(--ink); }
+.chip.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+/* Misc */
+.relative { position: relative; }
+.w-full { width: 100%; }
+.h-1 { height: 4px; width: 100%; background: var(--rule); }
+.h-1 > div { height: 100%; transition: width 0.3s; }
+
+/* Animation on phase change */
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fade-up 0.25s ease-out; }
+
+/* SVG chart text */
+.chart-axis-label { font-family: 'DM Sans', sans-serif; font-size: 11px; fill: var(--ink); }
+.chart-tick-label { font-family: 'DM Sans', sans-serif; font-size: 10px; fill: var(--mute); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect, useMemo } = React;
+
+const C = {
+  cream: "#F4F1EA", paper: "#FBFAF6", ink: "#1A1A1F", rule: "#D8D2C5",
+  navy: "#1E2A4A", navyT: "#2C3D66", gold: "#A8801C", goldT: "#C9A14A",
+  ox: "#8B2635", amber: "#B8860B", green: "#2D5A3D", mute: "#6B6B72",
+};
+
+// ─── Reference data ───────────────────────────────────────────────────────
+const PHASES = [
+  { id: "intake",     n: "01", title: "Project Definition",        sub: "Intake & scoping" },
+  { id: "aiact",      n: "02", title: "AI Act Risk Classification", sub: "Regulation (EU) 2024/1689" },
+  { id: "ea",         n: "03", title: "Enterprise Architecture",   sub: "ArchiMate layered view" },
+  { id: "compliance", n: "04", title: "Regulatory Compliance",     sub: "Cross-regulation matrix" },
+  { id: "ba",         n: "05", title: "Business Analysis",         sub: "Stakeholders & requirements" },
+  { id: "dashboard",  n: "06", title: "Executive Dashboard",       sub: "Score & recommendation" },
+];
+
+const USE_CASE_CATEGORIES = [
+  "Creditworthiness / credit scoring (natural persons)",
+  "Insurance pricing & risk (life / health)",
+  "Insurance pricing & risk (non-life)",
+  "Fraud detection / AML transaction monitoring",
+  "KYC / customer onboarding",
+  "Customer service AI agent / chatbot",
+  "Document automation / IDP",
+  "Marketing personalisation & next-best-action",
+  "Internal productivity AI agent (employee facing)",
+  "Code generation / developer copilot",
+  "Claims processing automation",
+  "Generative content (marketing / advisory drafts)",
+  "Other / experimental",
+];
+
+const BUSINESS_DOMAINS = [
+  "Retail Banking",
+  "Commercial / Corporate Banking",
+  "Private Banking & Wealth",
+  "Insurance",
+  "Asset Management & Markets",
+  "Operations & Shared Services",
+  "Group Functions (Risk, Finance, HR, Legal)",
+  "Cross-functional",
+];
+
+const AIACT_PROHIBITED = [
+  { id: "p1", q: "Does it perform social scoring of natural persons leading to detrimental treatment?" },
+  { id: "p2", q: "Does it use subliminal, manipulative or deceptive techniques to materially distort behaviour?" },
+  { id: "p3", q: "Does it exploit vulnerabilities of specific groups (age, disability, social/economic situation)?" },
+  { id: "p4", q: "Does it perform untargeted scraping of facial images for biometric databases?" },
+  { id: "p5", q: "Does it infer emotions in workplace / education contexts (outside medical or safety)?" },
+  { id: "p6", q: "Does it perform biometric categorisation inferring sensitive attributes (race, politics, union, beliefs, sex life)?" },
+];
+
+const AIACT_HIGHRISK = [
+  { id: "h1", q: "Annex III §5(b): Used to evaluate creditworthiness or establish credit score of natural persons?" },
+  { id: "h2", q: "Annex III §5(c): Used for risk assessment and pricing of life or health insurance?" },
+  { id: "h3", q: "Annex III §1: Biometric identification / categorisation of natural persons?" },
+  { id: "h4", q: "Annex III §4: Used in employment, recruitment, performance evaluation, task allocation?" },
+  { id: "h5", q: "Annex III §6: Used by law enforcement (unlikely for KBC)?" },
+  { id: "h6", q: "Annex III §8: Administration of justice / democratic processes (unlikely)?" },
+  { id: "h7", q: "Used as a safety component of a regulated product under EU harmonisation legislation?" },
+];
+
+const AIACT_TRANSPARENCY = [
+  { id: "t1", q: "System interacts directly with natural persons (e.g. chatbot)?" },
+  { id: "t2", q: "Generates synthetic audio, image, video, text content (deepfake-capable)?" },
+  { id: "t3", q: "Performs emotion recognition or biometric categorisation (where allowed)?" },
+];
+
+const AIACT_DEPLOYER_OBLIGATIONS = [
+  { id: "o9",  art: "Art. 9",  label: "Risk management system established and documented" },
+  { id: "o10", art: "Art. 10", label: "Data & data governance: training/validation/test sets quality, bias examination" },
+  { id: "o11", art: "Art. 11", label: "Technical documentation maintained (Annex IV)" },
+  { id: "o12", art: "Art. 12", label: "Automatic event logging during operation" },
+  { id: "o13", art: "Art. 13", label: "Transparency: instructions for use provided to deployers / users" },
+  { id: "o14", art: "Art. 14", label: "Effective human oversight measures designed and implemented" },
+  { id: "o15", art: "Art. 15", label: "Accuracy, robustness, cybersecurity levels defined and tested" },
+  { id: "o26", art: "Art. 26", label: "Deployer duties: monitor operation, ensure input data relevance, log retention" },
+  { id: "o27", art: "Art. 27", label: "Fundamental Rights Impact Assessment (FRIA) completed where required" },
+  { id: "o50", art: "Art. 50", label: "Transparency: end-users informed they interact with AI / view AI-generated content" },
+];
+
+const EA_LAYERS = [
+  {
+    id: "business", title: "Business Layer", color: C.gold,
+    items: [
+      { id: "b1", q: "Business capability impacted is mapped (KBC capability model)" },
+      { id: "b2", q: "Process changes documented (BPMN or equivalent)" },
+      { id: "b3", q: "Customer journey impact assessed" },
+      { id: "b4", q: "Operating model change defined (RACI shifts, FTE impact)" },
+      { id: "b5", q: "Business case approved (NPV, ROI, time-to-value)" },
+    ]
+  },
+  {
+    id: "application", title: "Application Layer", color: C.navy,
+    items: [
+      { id: "a1", q: "Application components identified (build vs buy vs reuse)" },
+      { id: "a2", q: "Reference architecture pattern selected (RAG, agentic, classifier, etc.)" },
+      { id: "a3", q: "Integration points documented (APIs, events, batch)" },
+      { id: "a4", q: "Reuse of existing platforms maximised (no shadow stacks)" },
+      { id: "a5", q: "Vendor / model lock-in risk assessed" },
+    ]
+  },
+  {
+    id: "data", title: "Data Layer", color: C.ox,
+    items: [
+      { id: "d1", q: "Data sources catalogued and lineage documented" },
+      { id: "d2", q: "Personal data identified and lawful basis confirmed (GDPR Art. 6)" },
+      { id: "d3", q: "Special categories of data assessed (GDPR Art. 9)" },
+      { id: "d4", q: "Data quality controls defined (completeness, accuracy, timeliness)" },
+      { id: "d5", q: "Bias examination performed on training data (AI Act Art. 10)" },
+      { id: "d6", q: "Cross-border data transfer assessment done where applicable" },
+    ]
+  },
+  {
+    id: "technology", title: "Technology Layer", color: C.green,
+    items: [
+      { id: "t1", q: "Hosting model defined (on-prem / private cloud / public cloud)" },
+      { id: "t2", q: "MLOps pipeline defined (CI/CD, model registry, monitoring)" },
+      { id: "t3", q: "Observability and logging meet DORA Art. 9-10 requirements" },
+      { id: "t4", q: "Security controls aligned with NIS2 Art. 21 measures" },
+      { id: "t5", q: "Disaster recovery and business continuity tested (DORA Art. 11-12)" },
+      { id: "t6", q: "Third-party (cloud / model provider) under DORA Art. 28-30 oversight" },
+    ]
+  },
+];
+
+const REGULATIONS = [
+  { id: "aiact", short: "AI Act", color: C.navy, name: "Regulation (EU) 2024/1689",
+    scope: "AI system lifecycle: design, training, deployment, post-market monitoring",
+    triggers: ["Any AI system placed on market or put into service in EU"],
+    keyArticles: ["Art. 5 (prohibited)", "Art. 6 + Annex III (high-risk)", "Art. 9-15 (provider obligations)", "Art. 26-27 (deployer obligations)", "Art. 50 (transparency)"] },
+  { id: "gdpr", short: "GDPR", color: C.ox, name: "Regulation (EU) 2016/679",
+    scope: "Processing of personal data of EU data subjects",
+    triggers: ["Any AI use case processing personal data"],
+    keyArticles: ["Art. 5 (principles)", "Art. 6 (lawful basis)", "Art. 9 (special categories)", "Art. 22 (automated decisions)", "Art. 25 (privacy by design)", "Art. 35 (DPIA)"] },
+  { id: "dora", short: "DORA", color: C.gold, name: "Regulation (EU) 2022/2554",
+    scope: "ICT risk management for financial entities",
+    triggers: ["Always applicable: KBC is a financial entity"],
+    keyArticles: ["Art. 5-16 (ICT risk mgmt)", "Art. 17-23 (incident mgmt & reporting)", "Art. 24-27 (resilience testing)", "Art. 28-30 (third-party risk)"] },
+  { id: "nis2", short: "NIS2", color: C.green, name: "Directive (EU) 2022/2555",
+    scope: "Cybersecurity for essential and important entities",
+    triggers: ["Banking and insurance are essential entities"],
+    keyArticles: ["Art. 20 (governance)", "Art. 21 (risk mgmt measures)", "Art. 23 (incident reporting)"] },
+  { id: "psd2", short: "PSD2", color: C.navyT, name: "Directive (EU) 2015/2366",
+    scope: "Payment services and account access",
+    triggers: ["Use case touches payment initiation, account information or authentication"],
+    keyArticles: ["Art. 65-67 (account access)", "Art. 97 (SCA)", "RTS on SCA & CSC"] },
+  { id: "eidas", short: "eIDAS", color: C.amber, name: "Regulation (EU) 910/2014 (as amended by eIDAS 2)",
+    scope: "Electronic identification and trust services",
+    triggers: ["Use case relies on digital identity, e-signatures, EUDI Wallet"],
+    keyArticles: ["Art. 6 (mutual recognition)", "Art. 24-28 (qualified trust services)"] },
+  { id: "dataact", short: "Data Act", color: C.goldT, name: "Regulation (EU) 2023/2854",
+    scope: "Fair access to and use of data, cloud switching",
+    triggers: ["Use case involves IoT data, cloud provider switching, B2B data sharing"],
+    keyArticles: ["Art. 4-5 (user data access)", "Art. 23-31 (cloud switching)"] },
+  { id: "dga", short: "Data Governance Act", color: C.mute, name: "Regulation (EU) 2022/868",
+    scope: "Data intermediation, altruism, public sector data re-use",
+    triggers: ["Use case involves data intermediation services or altruism schemes"],
+    keyArticles: ["Art. 10-15 (intermediation services)", "Art. 16-25 (data altruism)"] },
+  { id: "eba", short: "EBA Internal Governance", color: C.ink, name: "EBA/GL/2021/05 Guidelines",
+    scope: "Internal governance arrangements for credit institutions",
+    triggers: ["Always applicable: KBC is a credit institution"],
+    keyArticles: ["Title II (governance framework)", "Title V (risk management)", "Outsourcing (EBA/GL/2019/02)"] },
+];
+
+// ─── Storage helpers ──────────────────────────────────────────────────────
+// In-memory cache as a session-level fallback when window.storage is unavailable
+const __mem = {};
+async function safeGet(key) {
+  try { if (window.storage) { const r = await window.storage.get(key); return r ? r.value : null; } }
+  catch (e) {}
+  return __mem[key] || null;
+}
+async function safeSet(key, value) {
+  try { if (window.storage) { await window.storage.set(key, value); return true; } }
+  catch (e) {}
+  __mem[key] = value;
+  return true;
+}
+async function safeList(prefix) {
+  try { if (window.storage) { const r = await window.storage.list(prefix); return r ? r.keys : []; } }
+  catch (e) {}
+  return Object.keys(__mem).filter(k => k.startsWith(prefix));
+}
+async function safeDelete(key) {
+  try { if (window.storage) { await window.storage.delete(key); return true; } }
+  catch (e) {}
+  delete __mem[key];
+  return true;
+}
+
+// ─── Blank assessment ─────────────────────────────────────────────────────
+const blankAssessment = () => ({
+  id: `proj_${Date.now()}`,
+  meta: {
+    name: "", domain: "", category: "", sponsor: "", description: "",
+    decisionImpact: "Assists human decision",
+    dataSensitivity: "Standard personal data",
+    customerFacing: "Yes",
+    geography: "Belgium / EU",
+    status: "Discovery",
+    createdAt: new Date().toISOString(),
+  },
+  aiact: { prohibited: {}, highrisk: {}, transparency: {}, obligations: {}, fria: false, notes: "" },
+  ea: { business: {}, application: {}, data: {}, technology: {}, notes: "" },
+  compliance: REGULATIONS.reduce((acc, r) => {
+    acc[r.id] = { applicable: "Not assessed", status: "Not assessed", owner: "", notes: "" };
+    return acc;
+  }, {}),
+  ba: { stakeholders: [], frs: [], nfrs: [], stories: [] },
+});
+
+// ─── Scoring ──────────────────────────────────────────────────────────────
+const aiactRiskTier = (a) => {
+  const anyTrue = (obj) => Object.values(obj).some(v => v === true);
+  if (anyTrue(a.prohibited)) return { tier: "Prohibited", color: "#5C1A1A", desc: "Article 5: cannot be deployed under any circumstance." };
+  if (anyTrue(a.highrisk))   return { tier: "High-risk",  color: C.ox,    desc: "Annex III: full provider/deployer obligations apply." };
+  if (anyTrue(a.transparency)) return { tier: "Limited risk", color: C.amber, desc: "Article 50: transparency obligations apply." };
+  return { tier: "Minimal risk", color: C.green, desc: "No specific AI Act obligations beyond GPAI rules where applicable." };
+};
+
+const scoreEA = (ea) => {
+  const layers = ["business", "application", "data", "technology"];
+  const totals = layers.map(l => {
+    const items = EA_LAYERS.find(L => L.id === l).items;
+    const checked = items.filter(it => ea[l][it.id] === true).length;
+    return Math.round((checked / items.length) * 100);
+  });
+  return {
+    business: totals[0], application: totals[1], data: totals[2], technology: totals[3],
+    overall: Math.round(totals.reduce((a, b) => a + b, 0) / totals.length),
+  };
+};
+
+const scoreCompliance = (compliance) => {
+  const applicable = REGULATIONS.filter(r => compliance[r.id].applicable === "Yes");
+  if (!applicable.length) return 0;
+  const compliant = applicable.filter(r => compliance[r.id].status === "Compliant").length;
+  return Math.round((compliant / applicable.length) * 100);
+};
+
+const scoreBA = (ba) => {
+  let s = 0;
+  s += Math.min(25, Math.round((ba.stakeholders.length / 3) * 25));
+  s += Math.min(25, Math.round((ba.frs.length / 5) * 25));
+  s += Math.min(25, Math.round((ba.nfrs.length / 5) * 25));
+  s += Math.min(25, Math.round((ba.stories.length / 3) * 25));
+  return Math.min(s, 100);
+};
+
+const scoreAIAct = (aiact) => {
+  const tier = aiactRiskTier(aiact);
+  if (tier.tier === "Prohibited") return 0;
+  if (tier.tier === "Minimal risk") return 100;
+  const required = tier.tier === "High-risk"
+    ? AIACT_DEPLOYER_OBLIGATIONS
+    : AIACT_DEPLOYER_OBLIGATIONS.filter(o => ["o13", "o50"].includes(o.id));
+  if (!required.length) return 100;
+  const done = required.filter(o => aiact.obligations[o.id] === true).length;
+  return Math.round((done / required.length) * 100);
+};
+
+const recommendation = (overall, aiactTier) => {
+  if (aiactTier === "Prohibited") return { label: "STOP", color: "#5C1A1A", text: "Use case falls under AI Act Article 5 prohibitions. Do not proceed." };
+  if (overall >= 80) return { label: "GO", color: C.green, text: "Project demonstrates strong governance maturity. Proceed to delivery." };
+  if (overall >= 55) return { label: "CONDITIONAL GO", color: C.amber, text: "Proceed with conditions. Close gaps before key milestones." };
+  return { label: "NO-GO", color: C.ox, text: "Insufficient governance maturity. Remediate before stage gate." };
+};
+
+// ─── Atoms ────────────────────────────────────────────────────────────────
+const Brand = () => (
+  <div className="brand">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+      <rect x="1" y="1" width="32" height="32" stroke={C.ink} strokeWidth="1.5" fill={C.cream}/>
+      <path d="M8 24 L17 8 L26 24 Z" stroke={C.ink} strokeWidth="1.5" fill="none"/>
+      <circle cx="17" cy="18" r="2.5" fill={C.gold}/>
+    </svg>
+    <div>
+      <div className="brand-text-1">AEGIS</div>
+      <div className="brand-text-2">Governance · Architecture · Analysis</div>
+    </div>
+  </div>
+);
+
+const SectionHeader = ({ eyebrow, title, sub }) => (
+  <div className="section-header fade-in">
+    <div className="section-eyebrow">{eyebrow}</div>
+    <h2 className="section-title">{title}</h2>
+    {sub && <p className="section-sub">{sub}</p>}
+  </div>
+);
+
+const Field = ({ label, hint, children }) => (
+  <div>
+    <label className="field-label">{label}</label>
+    {children}
+    {hint && <div className="field-hint">{hint}</div>}
+  </div>
+);
+
+const Btn = ({ children, onClick, variant = "primary", small = false }) => {
+  const cls = `btn ${variant === "primary" ? "btn-primary" : variant === "ghost" ? "btn-ghost" : "btn-gold"} ${small ? "btn-sm" : "btn-md"}`;
+  return <button className={cls} onClick={onClick}>{children}</button>;
+};
+
+const Checkbox = ({ checked, onChange, label, sub }) => (
+  <div className="cb-row" onClick={() => onChange(!checked)}>
+    <div className={`cb-box ${checked ? "checked" : ""}`}>
+      {checked && (
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+          <path d="M2 5.5L4.5 8L9 2.5" stroke={C.cream} strokeWidth="1.8" strokeLinecap="square"/>
+        </svg>
+      )}
+    </div>
+    <div style={{ flex: 1 }}>
+      <div className="cb-label">{label}</div>
+      {sub && <div className="cb-sub">{sub}</div>}
+    </div>
+  </div>
+);
+
+// ─── SVG charts (custom, no recharts dependency) ──────────────────────────
+const RadarChart = ({ data, size = 280 }) => {
+  const cx = size / 2, cy = size / 2;
+  const r = size * 0.36;
+  const n = data.length;
+  const angle = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
+
+  // Grid rings
+  const rings = [0.25, 0.5, 0.75, 1.0];
+  const polygonPts = (pct) => data.map((_, i) => {
+    const a = angle(i);
+    return `${cx + Math.cos(a) * r * pct},${cy + Math.sin(a) * r * pct}`;
+  }).join(" ");
+
+  // Data polygon
+  const dataPts = data.map((d, i) => {
+    const a = angle(i);
+    const v = (d.value || 0) / 100;
+    return `${cx + Math.cos(a) * r * v},${cy + Math.sin(a) * r * v}`;
+  }).join(" ");
+
+  return (
+    <svg width="100%" height={size} viewBox={`0 0 ${size} ${size}`}>
+      {rings.map((p, i) => (
+        <polygon key={i} points={polygonPts(p)} fill="none" stroke={C.rule} strokeWidth="1" />
+      ))}
+      {data.map((_, i) => {
+        const a = angle(i);
+        return <line key={i} x1={cx} y1={cy} x2={cx + Math.cos(a) * r} y2={cy + Math.sin(a) * r} stroke={C.rule} strokeWidth="1" />;
+      })}
+      <polygon points={dataPts} fill={C.navy} fillOpacity="0.25" stroke={C.navy} strokeWidth="2" />
+      {data.map((d, i) => {
+        const a = angle(i);
+        const v = (d.value || 0) / 100;
+        return <circle key={i} cx={cx + Math.cos(a) * r * v} cy={cy + Math.sin(a) * r * v} r="3" fill={C.navy} />;
+      })}
+      {data.map((d, i) => {
+        const a = angle(i);
+        const lx = cx + Math.cos(a) * (r + 22);
+        const ly = cy + Math.sin(a) * (r + 22);
+        return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="chart-axis-label">{d.axis}</text>;
+      })}
+    </svg>
+  );
+};
+
+const HBarChart = ({ data, height = 280 }) => {
+  const margin = { left: 150, right: 24, top: 8, bottom: 24 };
+  const innerH = height - margin.top - margin.bottom;
+  const barH = innerH / data.length - 6;
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 600 ${height}`} preserveAspectRatio="none">
+      {/* X axis ticks */}
+      {[0, 25, 50, 75, 100].map((t, i) => {
+        const x = margin.left + ((600 - margin.left - margin.right) * t) / 100;
+        return (
+          <g key={i}>
+            <line x1={x} y1={margin.top} x2={x} y2={height - margin.bottom} stroke={C.rule} strokeWidth="1" />
+            <text x={x} y={height - 8} textAnchor="middle" className="chart-tick-label">{t}</text>
+          </g>
+        );
+      })}
+      {data.map((d, i) => {
+        const y = margin.top + i * (barH + 6) + 3;
+        const w = ((600 - margin.left - margin.right) * d.value) / 100;
+        return (
+          <g key={i}>
+            <text x={margin.left - 8} y={y + barH / 2 + 4} textAnchor="end" className="chart-axis-label">{d.name}</text>
+            <rect x={margin.left} y={y} width={600 - margin.left - margin.right} height={barH} fill="rgba(0,0,0,0.04)" />
+            <rect x={margin.left} y={y} width={w} height={barH} fill={d.color} />
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ─── Phase: Intake ────────────────────────────────────────────────────────
+const PhaseIntake = ({ a, update }) => (
+  <div className="fade-in">
+    <SectionHeader eyebrow="Phase 01" title="Project Definition"
+      sub="Capture the use case, sponsor, and operating context. Everything downstream depends on the precision of this intake." />
+    <div className="grid grid-2 gap-x-10 gap-y-6">
+      <Field label="Project Name">
+        <input className="input-line" value={a.meta.name} onChange={e => update("meta.name", e.target.value)} placeholder="e.g. AI Assistant for Wealth Advisors" />
+      </Field>
+      <Field label="Sponsor / Business Owner">
+        <input className="input-line" value={a.meta.sponsor} onChange={e => update("meta.sponsor", e.target.value)} placeholder="e.g. Head of Private Banking" />
+      </Field>
+      <Field label="Business Domain">
+        <select className="input-line" value={a.meta.domain} onChange={e => update("meta.domain", e.target.value)}>
+          <option value="">Select...</option>
+          {BUSINESS_DOMAINS.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+      <Field label="Use Case Category">
+        <select className="input-line" value={a.meta.category} onChange={e => update("meta.category", e.target.value)}>
+          <option value="">Select...</option>
+          {USE_CASE_CATEGORIES.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+      <Field label="Decision Impact" hint="How autonomous is the AI in the decision loop?">
+        <select className="input-line" value={a.meta.decisionImpact} onChange={e => update("meta.decisionImpact", e.target.value)}>
+          {["Informs human decision", "Assists human decision", "Recommends with human confirmation", "Autonomous decision"].map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+      <Field label="Data Sensitivity">
+        <select className="input-line" value={a.meta.dataSensitivity} onChange={e => update("meta.dataSensitivity", e.target.value)}>
+          {["No personal data", "Standard personal data", "Financial / payment data", "Special categories (Art. 9 GDPR)", "Mix of categories"].map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+      <Field label="Customer-facing?">
+        <select className="input-line" value={a.meta.customerFacing} onChange={e => update("meta.customerFacing", e.target.value)}>
+          {["Yes", "No - internal only", "Mixed"].map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+      <Field label="Geography">
+        <select className="input-line" value={a.meta.geography} onChange={e => update("meta.geography", e.target.value)}>
+          {["Belgium only", "Belgium / EU", "EU + non-EU subsidiaries", "Global"].map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+      <div className="col-span-12">
+        <Field label="Use Case Description" hint="Plain language: what does it do, for whom, why does it matter?">
+          <textarea className="input-area" rows="4" value={a.meta.description} onChange={e => update("meta.description", e.target.value)} placeholder="Describe the AI use case..." />
+        </Field>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── Phase: AI Act ────────────────────────────────────────────────────────
+const PhaseAIAct = ({ a, update }) => {
+  const tier = aiactRiskTier(a.aiact);
+  const showObligations = tier.tier !== "Prohibited" && tier.tier !== "Minimal risk";
+  const obligations = tier.tier === "High-risk"
+    ? AIACT_DEPLOYER_OBLIGATIONS
+    : AIACT_DEPLOYER_OBLIGATIONS.filter(o => ["o13", "o50"].includes(o.id));
+
+  return (
+    <div className="fade-in">
+      <SectionHeader eyebrow="Phase 02" title="AI Act Risk Classification"
+        sub="Regulation (EU) 2024/1689. Determine the risk tier, then map the obligations applicable to KBC as deployer (and provider, where it builds in-house)." />
+
+      <div className="card" style={{ marginBottom: 32 }}>
+        <div className="uppercase-tag text-mute" style={{ marginBottom: 8 }}>Computed Risk Tier</div>
+        <div style={{ fontFamily: "Fraunces, serif", fontSize: 40, fontWeight: 600, lineHeight: 1, color: tier.color }}>{tier.tier}</div>
+        <div style={{ fontSize: 13, marginTop: 8, color: C.ink }}>{tier.desc}</div>
+      </div>
+
+      <div className="grid grid-2 gap-8">
+        <div>
+          <div className="font-display" style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: C.ox }}>Article 5 · Prohibited Practices</div>
+          <div>
+            {AIACT_PROHIBITED.map(item => (
+              <Checkbox key={item.id} checked={!!a.aiact.prohibited[item.id]}
+                onChange={v => update(`aiact.prohibited.${item.id}`, v)} label={item.q} />
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="font-display" style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: C.navy }}>Article 6 + Annex III · High-risk</div>
+          <div>
+            {AIACT_HIGHRISK.map(item => (
+              <Checkbox key={item.id} checked={!!a.aiact.highrisk[item.id]}
+                onChange={v => update(`aiact.highrisk.${item.id}`, v)} label={item.q} />
+            ))}
+          </div>
+        </div>
+        <div className="col-span-12">
+          <div className="font-display" style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: C.amber }}>Article 50 · Transparency Obligations</div>
+          <div>
+            {AIACT_TRANSPARENCY.map(item => (
+              <Checkbox key={item.id} checked={!!a.aiact.transparency[item.id]}
+                onChange={v => update(`aiact.transparency.${item.id}`, v)} label={item.q} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {showObligations && (
+        <div style={{ marginTop: 40, paddingTop: 32, borderTop: `1px solid ${C.rule}` }}>
+          <div className="font-display" style={{ fontSize: 18, fontWeight: 500, marginBottom: 4, color: C.ink }}>Required Obligations</div>
+          <div style={{ fontSize: 12, marginBottom: 20, color: C.mute }}>Tick each obligation that is in place and evidenced.</div>
+          <div className="grid grid-2 gap-x-8">
+            {obligations.map(o => (
+              <Checkbox key={o.id} checked={!!a.aiact.obligations[o.id]}
+                onChange={v => update(`aiact.obligations.${o.id}`, v)} label={o.label} sub={o.art} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ marginTop: 32 }}>
+        <Field label="Notes & Evidence Pointers">
+          <textarea className="input-area" rows="3" value={a.aiact.notes} onChange={e => update("aiact.notes", e.target.value)}
+            placeholder="Link to FRIA, model cards, technical documentation..." />
+        </Field>
+      </div>
+    </div>
+  );
+};
+
+// ─── Phase: EA ────────────────────────────────────────────────────────────
+const PhaseEA = ({ a, update }) => {
+  const scores = scoreEA(a.ea);
+  return (
+    <div className="fade-in">
+      <SectionHeader eyebrow="Phase 03" title="Enterprise Architecture"
+        sub="ArchiMate-inspired four-layer assessment. Confirms the AI use case fits within KBC IT governance and technical standards." />
+
+      <div className="grid grid-4 gap-4" style={{ marginBottom: 40 }}>
+        {EA_LAYERS.map(L => (
+          <div key={L.id} className="card-tight">
+            <div className="uppercase-mini" style={{ color: L.color, marginBottom: 8 }}>{L.title}</div>
+            <div className="font-display" style={{ fontSize: 28, fontWeight: 500, color: C.ink }}>
+              {scores[L.id]}<span style={{ fontSize: 14, color: C.mute }}>%</span>
+            </div>
+            <div className="h-1" style={{ marginTop: 8 }}>
+              <div style={{ background: L.color, width: `${scores[L.id]}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+        {EA_LAYERS.map(L => (
+          <div key={L.id}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 16 }}>
+              <div className="layer-bar" style={{ background: L.color }} />
+              <div className="font-display" style={{ fontSize: 20, fontWeight: 500, color: C.ink }}>{L.title}</div>
+            </div>
+            <div className="grid grid-2 gap-x-8" style={{ paddingLeft: 16 }}>
+              {L.items.map(it => (
+                <Checkbox key={it.id} checked={!!a.ea[L.id][it.id]}
+                  onChange={v => update(`ea.${L.id}.${it.id}`, v)} label={it.q} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 32 }}>
+        <Field label="Architecture Notes">
+          <textarea className="input-area" rows="3" value={a.ea.notes} onChange={e => update("ea.notes", e.target.value)}
+            placeholder="Reference architecture diagram link, ADRs, deviation requests..." />
+        </Field>
+      </div>
+    </div>
+  );
+};
+
+// ─── Phase: Compliance ────────────────────────────────────────────────────
+const PhaseCompliance = ({ a, update }) => {
+  const [open, setOpen] = useState(REGULATIONS[0].id);
+  return (
+    <div className="fade-in">
+      <SectionHeader eyebrow="Phase 04" title="Regulatory Compliance Matrix"
+        sub="Nine EU instruments material to KBC. For each, declare applicability, status, and accountable owner." />
+
+      <div style={{ border: `1px solid ${C.rule}` }}>
+        <div className="cr-header" style={{ display: "grid", gridTemplateColumns: "repeat(12, minmax(0,1fr))", gap: 8 }}>
+          <div className="uppercase-mini text-mute" style={{ gridColumn: "span 3" }}>Instrument</div>
+          <div className="uppercase-mini text-mute" style={{ gridColumn: "span 2" }}>Applicable</div>
+          <div className="uppercase-mini text-mute" style={{ gridColumn: "span 2" }}>Status</div>
+          <div className="uppercase-mini text-mute" style={{ gridColumn: "span 2" }}>Owner</div>
+          <div className="uppercase-mini text-mute" style={{ gridColumn: "span 3" }}>Key Articles</div>
+        </div>
+        {REGULATIONS.map(r => {
+          const c = a.compliance[r.id];
+          const isOpen = open === r.id;
+          const statusColor = c.status === "Compliant" ? C.green : c.status === "Gap" ? C.ox : c.status === "In progress" ? C.amber : C.ink;
+          const statusBorder = c.status === "Compliant" ? C.green : c.status === "Gap" ? C.ox : c.status === "In progress" ? C.amber : C.rule;
+          return (
+            <div key={r.id}>
+              <div className="cr-row" onClick={() => setOpen(isOpen ? null : r.id)}>
+                <div style={{ gridColumn: "span 3", display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 4, height: 20, background: r.color }} />
+                  <div>
+                    <div className="font-display" style={{ fontSize: 15, fontWeight: 500 }}>{r.short}</div>
+                    <div className="uppercase-mini text-mute">{r.name}</div>
+                  </div>
+                </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <select className="tiny-select" value={c.applicable}
+                    onClick={e => e.stopPropagation()}
+                    onChange={e => update(`compliance.${r.id}.applicable`, e.target.value)}
+                    style={{ borderColor: c.applicable === "Yes" ? C.ink : C.rule }}>
+                    <option>Not assessed</option><option>Yes</option><option>Partial</option><option>No</option>
+                  </select>
+                </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <select className="tiny-select" value={c.status}
+                    onClick={e => e.stopPropagation()}
+                    onChange={e => update(`compliance.${r.id}.status`, e.target.value)}
+                    style={{ borderColor: statusBorder, color: statusColor }}>
+                    <option>Not assessed</option><option>Compliant</option><option>In progress</option><option>Gap</option>
+                  </select>
+                </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <input className="input-line" style={{ fontSize: 12, padding: "4px 0" }} value={c.owner}
+                    onClick={e => e.stopPropagation()}
+                    onChange={e => update(`compliance.${r.id}.owner`, e.target.value)} placeholder="Owner" />
+                </div>
+                <div className="uppercase-mini text-mute" style={{ gridColumn: "span 3" }}>
+                  {r.keyArticles.slice(0, 2).join(" · ")}{r.keyArticles.length > 2 ? "..." : ""}
+                </div>
+              </div>
+              {isOpen && (
+                <div className="cr-detail">
+                  <div className="grid grid-12 gap-6">
+                    <div style={{ gridColumn: "span 7" }}>
+                      <div className="uppercase-mini text-mute" style={{ marginBottom: 4 }}>Scope</div>
+                      <div style={{ fontSize: 13, marginBottom: 12 }}>{r.scope}</div>
+                      <div className="uppercase-mini text-mute" style={{ marginBottom: 4 }}>Triggers</div>
+                      <ul style={{ marginBottom: 12, listStyle: "none" }}>
+                        {r.triggers.map((t, i) => <li key={i} style={{ fontSize: 13, display: "flex", gap: 8 }}><span style={{ color: r.color }}>·</span><span>{t}</span></li>)}
+                      </ul>
+                      <div className="uppercase-mini text-mute" style={{ marginBottom: 4 }}>Key Articles</div>
+                      <div className="font-mono" style={{ fontSize: 11 }}>{r.keyArticles.join(" · ")}</div>
+                    </div>
+                    <div style={{ gridColumn: "span 5" }}>
+                      <Field label="Notes & Evidence">
+                        <textarea className="input-area" rows="6" value={c.notes}
+                          onChange={e => update(`compliance.${r.id}.notes`, e.target.value)}
+                          placeholder="Link to DPIA, FRIA, technical documentation, audit reports..." />
+                      </Field>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ─── Phase: BA ────────────────────────────────────────────────────────────
+const PhaseBA = ({ a, update }) => {
+  const addItem = (key, factory) => update(`ba.${key}`, [...a.ba[key], factory()]);
+  const removeItem = (key, idx) => update(`ba.${key}`, a.ba[key].filter((_, i) => i !== idx));
+  const updateItem = (key, idx, field, value) => {
+    update(`ba.${key}`, a.ba[key].map((it, i) => i === idx ? { ...it, [field]: value } : it));
+  };
+
+  const inlineInput = { background: "transparent", border: "none", borderBottom: `1px solid ${C.rule}`, padding: "8px 0", fontSize: 13, outline: "none", width: "100%" };
+  const removeBtn = { fontFamily: "JetBrains Mono, monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", color: C.ox, cursor: "pointer", background: "none", border: "none" };
+
+  return (
+    <div className="fade-in">
+      <SectionHeader eyebrow="Phase 05" title="Business Analysis"
+        sub="Stakeholders, requirements, and user stories. The artefacts a data engineering team can actually build from." />
+
+      {/* Stakeholders */}
+      <div style={{ marginBottom: 48 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+          <div className="font-display" style={{ fontSize: 20, fontWeight: 500 }}>Stakeholder Map (RACI)</div>
+          <Btn small variant="ghost" onClick={() => addItem("stakeholders", () => ({ name: "", role: "", raci: "Consulted" }))}>+ Add stakeholder</Btn>
+        </div>
+        {a.ba.stakeholders.length === 0 && (
+          <div style={{ border: `1px dashed ${C.rule}`, padding: 32, textAlign: "center", fontSize: 13, color: C.mute }}>
+            No stakeholders yet. Map at least three: business owner, data steward, and a customer-side representative.
+          </div>
+        )}
+        {a.ba.stakeholders.map((s, i) => (
+          <div key={i} className="grid grid-12 gap-3" style={{ marginBottom: 8, alignItems: "center" }}>
+            <input style={{ ...inlineInput, gridColumn: "span 4" }} placeholder="Name / function" value={s.name} onChange={e => updateItem("stakeholders", i, "name", e.target.value)} />
+            <input style={{ ...inlineInput, gridColumn: "span 4" }} placeholder="Role / department" value={s.role} onChange={e => updateItem("stakeholders", i, "role", e.target.value)} />
+            <select style={{ ...inlineInput, gridColumn: "span 3", fontFamily: "JetBrains Mono, monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em" }}
+              value={s.raci} onChange={e => updateItem("stakeholders", i, "raci", e.target.value)}>
+              <option>Responsible</option><option>Accountable</option><option>Consulted</option><option>Informed</option>
+            </select>
+            <button style={{ ...removeBtn, gridColumn: "span 1" }} onClick={() => removeItem("stakeholders", i)}>Remove</button>
+          </div>
+        ))}
+      </div>
+
+      {/* Functional reqs */}
+      <div style={{ marginBottom: 48 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+          <div className="font-display" style={{ fontSize: 20, fontWeight: 500 }}>Functional Requirements</div>
+          <Btn small variant="ghost" onClick={() => addItem("frs", () => ({ id: `FR-${a.ba.frs.length + 1}`, text: "", priority: "Must" }))}>+ Add FR</Btn>
+        </div>
+        {a.ba.frs.map((f, i) => (
+          <div key={i} className="grid grid-12 gap-3" style={{ marginBottom: 8, alignItems: "center" }}>
+            <input style={{ ...inlineInput, gridColumn: "span 2", fontFamily: "JetBrains Mono, monospace", fontSize: 12 }} value={f.id} onChange={e => updateItem("frs", i, "id", e.target.value)} />
+            <input style={{ ...inlineInput, gridColumn: "span 7" }} placeholder="The system shall..." value={f.text} onChange={e => updateItem("frs", i, "text", e.target.value)} />
+            <select style={{ ...inlineInput, gridColumn: "span 2", fontFamily: "JetBrains Mono, monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em" }}
+              value={f.priority} onChange={e => updateItem("frs", i, "priority", e.target.value)}>
+              <option>Must</option><option>Should</option><option>Could</option><option>Won't</option>
+            </select>
+            <button style={{ ...removeBtn, gridColumn: "span 1" }} onClick={() => removeItem("frs", i)}>Remove</button>
+          </div>
+        ))}
+      </div>
+
+      {/* Non-functional reqs */}
+      <div style={{ marginBottom: 48 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+          <div className="font-display" style={{ fontSize: 20, fontWeight: 500 }}>Non-Functional Requirements</div>
+          <Btn small variant="ghost" onClick={() => addItem("nfrs", () => ({ id: `NFR-${a.ba.nfrs.length + 1}`, category: "Performance", text: "" }))}>+ Add NFR</Btn>
+        </div>
+        {a.ba.nfrs.map((n, i) => (
+          <div key={i} className="grid grid-12 gap-3" style={{ marginBottom: 8, alignItems: "center" }}>
+            <input style={{ ...inlineInput, gridColumn: "span 2", fontFamily: "JetBrains Mono, monospace", fontSize: 12 }} value={n.id} onChange={e => updateItem("nfrs", i, "id", e.target.value)} />
+            <select style={{ ...inlineInput, gridColumn: "span 2", fontFamily: "JetBrains Mono, monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em" }}
+              value={n.category} onChange={e => updateItem("nfrs", i, "category", e.target.value)}>
+              {["Performance", "Security", "Privacy", "Explainability", "Fairness", "Resilience", "Scalability", "Usability", "Auditability"].map(c => <option key={c}>{c}</option>)}
+            </select>
+            <input style={{ ...inlineInput, gridColumn: "span 7" }} placeholder="Threshold or target..." value={n.text} onChange={e => updateItem("nfrs", i, "text", e.target.value)} />
+            <button style={{ ...removeBtn, gridColumn: "span 1" }} onClick={() => removeItem("nfrs", i)}>Remove</button>
+          </div>
+        ))}
+      </div>
+
+      {/* User stories */}
+      <div>
+        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+          <div className="font-display" style={{ fontSize: 20, fontWeight: 500 }}>User Stories</div>
+          <Btn small variant="ghost" onClick={() => addItem("stories", () => ({ id: `US-${a.ba.stories.length + 1}`, persona: "", want: "", value: "", ac: "" }))}>+ Add story</Btn>
+        </div>
+        {a.ba.stories.map((s, i) => (
+          <div key={i} className="card-tight" style={{ marginBottom: 12 }}>
+            <div className="flex justify-between items-center" style={{ marginBottom: 12 }}>
+              <input style={{ ...inlineInput, fontFamily: "JetBrains Mono, monospace", fontSize: 12, width: 80 }} value={s.id} onChange={e => updateItem("stories", i, "id", e.target.value)} />
+              <button style={removeBtn} onClick={() => removeItem("stories", i)}>Remove</button>
+            </div>
+            <div style={{ fontSize: 13, color: C.ink, lineHeight: 2 }}>
+              <span style={{ color: C.mute }}>As a </span>
+              <input style={{ ...inlineInput, display: "inline-block", width: "auto", minWidth: 120, padding: "0 4px", margin: "0 4px" }} placeholder="persona" value={s.persona} onChange={e => updateItem("stories", i, "persona", e.target.value)} />
+              <span style={{ color: C.mute }}>, I want </span>
+              <input style={{ ...inlineInput, display: "inline-block", width: "auto", minWidth: 200, padding: "0 4px", margin: "0 4px" }} placeholder="capability" value={s.want} onChange={e => updateItem("stories", i, "want", e.target.value)} />
+              <span style={{ color: C.mute }}>, so that </span>
+              <input style={{ ...inlineInput, display: "inline-block", width: "auto", minWidth: 200, padding: "0 4px", margin: "0 4px" }} placeholder="business value" value={s.value} onChange={e => updateItem("stories", i, "value", e.target.value)} />
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <Field label="Acceptance Criteria">
+                <textarea className="input-area" rows="2" value={s.ac} onChange={e => updateItem("stories", i, "ac", e.target.value)} placeholder="Given... When... Then..." />
+              </Field>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Phase: Dashboard ─────────────────────────────────────────────────────
+const PhaseDashboard = ({ a }) => {
+  const aiTier = aiactRiskTier(a.aiact);
+  const sAI = scoreAIAct(a.aiact);
+  const sEA = scoreEA(a.ea);
+  const sComp = scoreCompliance(a.compliance);
+  const sBA = scoreBA(a.ba);
+  const overall = Math.round((sAI + sEA.overall + sComp + sBA) / 4);
+  const rec = recommendation(overall, aiTier.tier);
+
+  const radarData = [
+    { axis: "AI Act", value: sAI },
+    { axis: "Architecture", value: sEA.overall },
+    { axis: "Compliance", value: sComp },
+    { axis: "BA", value: sBA },
+    { axis: "Risk Posture", value: aiTier.tier === "Prohibited" ? 0 : aiTier.tier === "High-risk" ? sAI : 100 },
+  ];
+
+  const compBars = REGULATIONS.map(r => ({
+    name: r.short,
+    value: a.compliance[r.id].status === "Compliant" ? 100 : a.compliance[r.id].status === "In progress" ? 50 : a.compliance[r.id].status === "Gap" ? 20 : 0,
+    color: r.color,
+  }));
+
+  const actions = [];
+  if (aiTier.tier === "High-risk") {
+    AIACT_DEPLOYER_OBLIGATIONS.forEach(o => { if (!a.aiact.obligations[o.id]) actions.push({ priority: "P1", text: `AI Act ${o.art}: ${o.label}` }); });
+  }
+  REGULATIONS.forEach(r => {
+    if (a.compliance[r.id].applicable === "Yes" && a.compliance[r.id].status === "Gap") actions.push({ priority: "P1", text: `Close compliance gap: ${r.short}` });
+    if (a.compliance[r.id].applicable === "Yes" && a.compliance[r.id].status === "In progress") actions.push({ priority: "P2", text: `Complete compliance work: ${r.short}` });
+  });
+  EA_LAYERS.forEach(L => { L.items.forEach(it => { if (!a.ea[L.id][it.id]) actions.push({ priority: "P3", text: `Architecture (${L.title}): ${it.q}` }); }); });
+  if (a.ba.stakeholders.length < 3) actions.push({ priority: "P2", text: "Complete stakeholder map (minimum three)" });
+  if (a.ba.frs.length < 5) actions.push({ priority: "P2", text: "Document at least five functional requirements" });
+  if (a.ba.nfrs.length < 5) actions.push({ priority: "P2", text: "Define at least five non-functional requirements" });
+  if (a.ba.stories.length < 3) actions.push({ priority: "P3", text: "Draft at least three user stories with acceptance criteria" });
+
+  const top = actions.sort((x, y) => x.priority.localeCompare(y.priority)).slice(0, 8);
+
+  return (
+    <div className="fade-in">
+      <SectionHeader eyebrow="Phase 06" title="Executive Dashboard"
+        sub="The one-page view for steering committees: where the project stands, what is blocking it, what to do next." />
+
+      {/* Headline */}
+      <div className="card" style={{ borderWidth: 2, borderColor: rec.color, marginBottom: 32 }}>
+        <div className="grid grid-12 gap-8" style={{ alignItems: "center" }}>
+          <div style={{ gridColumn: "span 4" }}>
+            <div className="uppercase-tag text-mute" style={{ marginBottom: 8 }}>Recommendation</div>
+            <div className="font-display" style={{ fontSize: 44, fontWeight: 600, lineHeight: 1, color: rec.color }}>{rec.label}</div>
+            <div style={{ fontSize: 13, marginTop: 12 }}>{rec.text}</div>
+          </div>
+          <div style={{ gridColumn: "span 3" }}>
+            <div className="uppercase-tag text-mute" style={{ marginBottom: 8 }}>Overall Readiness</div>
+            <div className="font-display" style={{ fontSize: 64, fontWeight: 600, lineHeight: 1 }}>{overall}<span style={{ fontSize: 24, color: C.mute }}>%</span></div>
+          </div>
+          <div style={{ gridColumn: "span 5" }}>
+            <div className="uppercase-tag text-mute" style={{ marginBottom: 8 }}>AI Act Risk Tier</div>
+            <div className="font-display" style={{ fontSize: 28, fontWeight: 600, lineHeight: 1, marginBottom: 8, color: aiTier.color }}>{aiTier.tier}</div>
+            <div style={{ fontSize: 12, color: C.mute }}>{aiTier.desc}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-2 gap-8" style={{ marginBottom: 32 }}>
+        <div className="card">
+          <div className="uppercase-mini text-mute" style={{ marginBottom: 4 }}>Multi-axis assessment</div>
+          <div className="font-display" style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Governance Profile</div>
+          <RadarChart data={radarData} />
+        </div>
+        <div className="card">
+          <div className="uppercase-mini text-mute" style={{ marginBottom: 4 }}>By regulation</div>
+          <div className="font-display" style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Compliance Heat</div>
+          <HBarChart data={compBars} />
+        </div>
+      </div>
+
+      {/* Score grid */}
+      <div className="grid grid-4 gap-3" style={{ marginBottom: 32 }}>
+        {[
+          { label: "AI Act Maturity", val: sAI, color: C.navy },
+          { label: "Architecture Fit", val: sEA.overall, color: C.gold },
+          { label: "Compliance Coverage", val: sComp, color: C.ox },
+          { label: "Business Analysis", val: sBA, color: C.green },
+        ].map((s, i) => (
+          <div key={i} className="card-tight">
+            <div className="uppercase-mini" style={{ color: s.color, marginBottom: 8 }}>{s.label}</div>
+            <div className="font-display" style={{ fontSize: 34, fontWeight: 500, lineHeight: 1 }}>{s.val}<span style={{ fontSize: 14, color: C.mute }}>%</span></div>
+            <div className="h-1" style={{ marginTop: 8 }}>
+              <div style={{ background: s.color, width: `${s.val}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Actions */}
+      <div className="card">
+        <div className="font-display" style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>Top Actions to Close Gaps</div>
+        {top.length === 0 ? (
+          <div style={{ fontSize: 14, color: C.mute }}>No outstanding gaps detected. Excellent posture.</div>
+        ) : (
+          <ol style={{ listStyle: "none" }}>
+            {top.map((act, i) => (
+              <li key={i} className="grid grid-12 gap-3" style={{ alignItems: "baseline", marginBottom: 12 }}>
+                <div style={{
+                  gridColumn: "span 1",
+                  fontFamily: "JetBrains Mono, monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.14em",
+                  padding: "2px 8px", color: C.cream, width: "fit-content",
+                  background: act.priority === "P1" ? C.ox : act.priority === "P2" ? C.amber : C.mute,
+                }}>{act.priority}</div>
+                <div style={{ gridColumn: "span 11", fontSize: 13 }}>{act.text}</div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── Root ─────────────────────────────────────────────────────────────────
+function App() {
+  const [a, setA] = useState(blankAssessment());
+  const [phase, setPhase] = useState("intake");
+  const [savedList, setSavedList] = useState([]);
+  const [showSaved, setShowSaved] = useState(false);
+  const [toast, setToast] = useState("");
+
+  const update = (path, value) => {
+    setA(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const parts = path.split(".");
+      let cur = next;
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (cur[parts[i]] === undefined) cur[parts[i]] = {};
+        cur = cur[parts[i]];
+      }
+      cur[parts[parts.length - 1]] = value;
+      return next;
+    });
+  };
+
+  const refreshList = async () => {
+    const keys = await safeList("assessment:");
+    const items = [];
+    for (const k of keys) {
+      const v = await safeGet(k);
+      if (v) {
+        try {
+          const parsed = JSON.parse(v);
+          items.push({ key: k, name: parsed.meta?.name || "(untitled)", date: parsed.meta?.createdAt });
+        } catch (e) {}
+      }
+    }
+    setSavedList(items.sort((x, y) => (y.date || "").localeCompare(x.date || "")));
+  };
+
+  useEffect(() => { refreshList(); }, []);
+
+  const flash = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2200); };
+
+  const save = async () => {
+    if (!a.meta.name) { flash("Please give the project a name first."); return; }
+    const ok = await safeSet(`assessment:${a.id}`, JSON.stringify(a));
+    if (ok) { flash("Saved."); refreshList(); } else flash("Storage unavailable in this session.");
+  };
+
+  const load = async (key) => {
+    const v = await safeGet(key);
+    if (v) { try { setA(JSON.parse(v)); setShowSaved(false); flash("Loaded."); } catch (e) { flash("Could not parse."); } }
+  };
+
+  const remove = async (key) => { await safeDelete(key); refreshList(); };
+  const newOne = () => { setA(blankAssessment()); setPhase("intake"); };
+
+  const exportJson = () => {
+    const blob = new Blob([JSON.stringify(a, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `aegis_${a.meta.name || "assessment"}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const tier = aiactRiskTier(a.aiact);
+  const sAI = scoreAIAct(a.aiact);
+  const sEA = scoreEA(a.ea).overall;
+  const sComp = scoreCompliance(a.compliance);
+  const sBA = scoreBA(a.ba);
+  const overall = Math.round((sAI + sEA + sComp + sBA) / 4);
+
+  const renderPhase = () => {
+    switch (phase) {
+      case "intake": return <PhaseIntake a={a} update={update} />;
+      case "aiact": return <PhaseAIAct a={a} update={update} />;
+      case "ea": return <PhaseEA a={a} update={update} />;
+      case "compliance": return <PhaseCompliance a={a} update={update} />;
+      case "ba": return <PhaseBA a={a} update={update} />;
+      case "dashboard": return <PhaseDashboard a={a} />;
+      default: return null;
+    }
+  };
+
+  const phaseIdx = PHASES.findIndex(p => p.id === phase);
+
+  return (
+    <div className="app">
+      <header className="header">
+        <div className="header-row">
+          <Brand />
+          <div className="header-meta" style={{ display: window.innerWidth > 1100 ? "flex" : "none" }}>
+            <div className="text-right">
+              <div className="uppercase-mini text-mute">Project</div>
+              <div className="font-display" style={{ fontSize: 14, fontWeight: 500 }}>{a.meta.name || "Untitled assessment"}</div>
+            </div>
+            <div className="divider-v" />
+            <div className="text-right">
+              <div className="uppercase-mini text-mute">Risk Tier</div>
+              <div className="font-display" style={{ fontSize: 14, fontWeight: 500, color: tier.color }}>{tier.tier}</div>
+            </div>
+            <div className="divider-v" />
+            <div className="text-right">
+              <div className="uppercase-mini text-mute">Readiness</div>
+              <div className="font-display" style={{ fontSize: 14, fontWeight: 500 }}>{overall}%</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Btn small variant="ghost" onClick={() => setShowSaved(true)}>Saved ({savedList.length})</Btn>
+            <Btn small variant="ghost" onClick={newOne}>New</Btn>
+            <Btn small variant="ghost" onClick={exportJson}>Export</Btn>
+            <Btn small onClick={save}>Save</Btn>
+          </div>
+        </div>
+        <div className="phase-nav">
+          {PHASES.map(p => (
+            <button key={p.id} className={`phase-btn ${p.id === phase ? "active" : ""}`} onClick={() => setPhase(p.id)}>
+              <span className="phase-btn-num">{p.n}</span>
+              <span className="phase-btn-label">{p.title}</span>
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <main className="content">
+        {renderPhase()}
+        <div className="nav-end">
+          <button className="nav-link" disabled={phaseIdx === 0} onClick={() => setPhase(PHASES[phaseIdx - 1].id)}>
+            ← Previous{phaseIdx > 0 ? `: ${PHASES[phaseIdx - 1].title}` : ""}
+          </button>
+          <button className="nav-link" disabled={phaseIdx === PHASES.length - 1} onClick={() => setPhase(PHASES[phaseIdx + 1].id)}>
+            {phaseIdx < PHASES.length - 1 ? `Next: ${PHASES[phaseIdx + 1].title}` : ""} →
+          </button>
+        </div>
+      </main>
+
+      <footer className="foot">
+        <div className="foot-inner">
+          <div className="mono-tag">AEGIS · Built for KBC Bank & Insurance · AI Project Governance</div>
+          <div className="mono-tag">AI Act · GDPR · DORA · NIS2 · PSD2 · eIDAS · Data Act · DGA · EBA Guidelines</div>
+        </div>
+      </footer>
+
+      {showSaved && (
+        <div className="drawer-bg" onClick={() => setShowSaved(false)}>
+          <div className="drawer" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
+              <div className="font-display" style={{ fontSize: 24, fontWeight: 500 }}>Saved Assessments</div>
+              <button className="mono-tag" style={{ cursor: "pointer", border: "none", background: "none" }} onClick={() => setShowSaved(false)}>Close</button>
+            </div>
+            {savedList.length === 0 ? (
+              <div style={{ fontSize: 13, color: C.mute }}>Nothing saved yet. Hit Save in the top bar to create a record.</div>
+            ) : savedList.map(item => (
+              <div key={item.key} className="flex justify-between items-center" style={{ borderBottom: `1px solid ${C.rule}`, padding: "12px 0" }}>
+                <div>
+                  <div className="font-display" style={{ fontSize: 15, fontWeight: 500 }}>{item.name}</div>
+                  <div className="uppercase-mini text-mute">{item.date ? new Date(item.date).toLocaleString() : ""}</div>
+                </div>
+                <div className="flex gap-2">
+                  <Btn small variant="ghost" onClick={() => load(item.key)}>Load</Btn>
+                  <Btn small variant="ghost" onClick={() => remove(item.key)}>Delete</Btn>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
